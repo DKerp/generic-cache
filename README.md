@@ -8,8 +8,9 @@ the conrete key of type `K`, and `value` the concrete object instance of type `V
 <K, V> -> (key: K -> value: Arc<V>)
 ```
 
-Note that values get automatically wrapped in an [`Arc`] by the `Cache` itself, so you do not need to wrap your
-objects in an [`Arc`] yourself.
+Note that values get automatically wrapped in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html)
+by the [`Cache`](crate::Cache) itself, so you do not need to wrap your
+objects in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) yourself.
 
 # Async runtime required
 
@@ -24,7 +25,7 @@ as executors in order to use the respective runtime. You can also use any other 
 
 We load a `User` record from the database and create a `Profile` page out of it in a relatively expensive way.
 Each user can be uniquely identified by either its `id` or its `username`. We save both structures under both
-keys inside a [`Cache`] instance which gets run by the [`tokio`](https://docs.rs/tokio) runtime.
+keys inside a [`Cache`](crate::Cache) instance which gets run by the [`tokio`](https://docs.rs/tokio) runtime.
 
 ```rust
 use std::sync::Arc;
