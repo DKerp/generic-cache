@@ -19,7 +19,8 @@ struct Profile {
 }
 
 
-#[tokio::main] // Can be replaced with #[async_std::main] if necessary.
+// Can be replaced with #[async_std::main] if necessary.
+#[tokio::main]
 async fn main() {
     pretty_env_logger::init();
 
@@ -48,28 +49,28 @@ async fn main() {
     /* Save the values inside the cache. */
 
     // Save the user record indexed unter its id.
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.id, // The key (u64)
         Arc::clone(&user), // The value (Arc<User>)
         0, // The size in bytes. Should be adjusted as appropriate.
     ).await.unwrap();
 
     // Save the user record indexed unter its username.
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.username.clone(), // The key (String)
         Arc::clone(&user), // The value (Arc<User>)
         0, // The size in bytes. Should be adjusted as appropriate.
     ).await.unwrap();
 
     // Save the generated profile indexed unter the user's id.
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.id, // The key (u64)
         Arc::clone(&profile), // The value (Arc<Profile>)
         0, // The size in bytes. Should be adjusted as appropriate.
     ).await.unwrap();
 
     // Save the generated profile indexed unter the user's username.
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.username.clone(), // The key (String)
         Arc::clone(&profile), // The value (Arc<Profile>)
         0, // The size in bytes. Should be adjusted as appropriate.
@@ -82,18 +83,22 @@ async fn main() {
     // (e.g. Arc<Arc<User>>).
 
     // Find the user by its id.
-    let compare = cache.get::<_, Arc<User>>(user.id).await.unwrap().unwrap();
-    assert_eq!(user, *compare);
+    // Fully qualified syntax.
+    let compare = cache.get::<u64, User>(user.id).await.unwrap().unwrap();
+    assert_eq!(user, compare);
 
     // Now find it by its username.
-    let compare = cache.get::<_, Arc<User>>(user.username.clone()).await.unwrap().unwrap();
-    assert_eq!(user, *compare);
+    // Fully qualified syntax.
+    let compare = cache.get::<String, User>(user.username.clone()).await.unwrap().unwrap();
+    assert_eq!(user, compare);
 
     // Find the rendered profile page by the user`s id.
-    let compare = cache.get::<_, Arc<Profile>>(user.id).await.unwrap().unwrap();
-    assert_eq!(profile, *compare);
+    // Fully qualified syntax with implicit key type.
+    let compare = cache.get::<_, Profile>(user.id).await.unwrap().unwrap();
+    assert_eq!(profile, compare);
 
     // Find the rendered profile page by the user`s username.
-    let compare = cache.get::<_, Arc<Profile>>(user.username.clone()).await.unwrap().unwrap();
-    assert_eq!(profile, *compare);
+    // Implicit syntax. Note that we must annotate the Arc.
+    let compare: Arc<Profile> = cache.get(user.username.clone()).await.unwrap().unwrap();
+    assert_eq!(profile, compare);
 }

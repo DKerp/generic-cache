@@ -238,6 +238,8 @@ where
     /// Try to save the `value` of type `V` under the given `key` of type `K`, replacing any other
     /// value of type `V` currently saved under that `key`.
     ///
+    /// The [`Cache`] instance will wrap the `value` inside an [`Arc`] before saving it.
+    ///
     /// The size of the `value` gets automatically computed by the [`Size`] trait implementation.
     pub async fn set<K, V>(
         &self,
@@ -249,18 +251,65 @@ where
         V: Size + Send + Sync + 'static,
     {
         let size = Size::get_size(&value);
+        let value = Arc::new(value);
 
-        self.set_with_size(key, value, size).await
+        self.set_arc_with_size::<K, V>(key, value, size).await
     }
 
     /// Try to save the `value` of type `V` under the given `key` of type `K`, replacing any other
     /// value of type `V` currently saved under that `key`.
+    ///
+    /// In this variant the `value` is already wrapped in an [`Arc`], so the [`Cache`] instance will
+    /// not wrap it itself.
+    ///
+    /// The size of the `value` gets automatically computed by the [`Size`] trait implementation.
+    pub async fn set_arc<K, V>(
+        &self,
+        key: K,
+        value: Arc<V>,
+    ) -> Result<(), Error>
+    where
+        K: Ord + Send + Sync + 'static,
+        V: Size + Send + Sync + 'static,
+    {
+        // Make sure we take the size of V and not of Arc<V> (note the *).
+        let size = Size::get_size(&*value);
+
+        self.set_arc_with_size::<K, V>(key, value, size).await
+    }
+
+    /// Try to save the `value` of type `V` under the given `key` of type `K`, replacing any other
+    /// value of type `V` currently saved under that `key`.
+    ///
+    /// The [`Cache`] instance will wrap the `value` inside an [`Arc`] before saving it.
     ///
     /// The `size` of the `value` must be manually handed over.
     pub async fn set_with_size<K, V>(
         &self,
         key: K,
         value: V,
+        size: usize,
+    ) -> Result<(), Error>
+    where
+        K: Ord + Send + Sync + 'static,
+        V: Send + Sync + 'static,
+    {
+        let value = Arc::new(value);
+
+        self.set_arc_with_size::<K, V>(key, value, size).await
+    }
+
+    /// Try to save the `value` of type `V` under the given `key` of type `K`, replacing any other
+    /// value of type `V` currently saved under that `key`.
+    ///
+    /// In this variant the `value` is already wrapped in an [`Arc`], so the [`Cache`] instance will
+    /// not wrap it itself.
+    ///
+    /// The `size` of the `value` must be manually handed over.
+    pub async fn set_arc_with_size<K, V>(
+        &self,
+        key: K,
+        value: Arc<V>,
         size: usize,
     ) -> Result<(), Error>
     where
@@ -904,7 +953,7 @@ where
                     };
                     let key: K = *key;
 
-                    let obj: Box<V> = match box_obj.downcast() {
+                    let obj: Box<Arc<V>> = match box_obj.downcast() {
                         Ok(obj) => obj,
                         Err(_) => {
                             let resp = CacheResp::Err(Error::ConvertionFailed);
@@ -913,7 +962,7 @@ where
                             continue;
                         }
                     };
-                    let obj: V = *obj;
+                    let obj: Arc<V> = *obj;
 
                     match self.store.get_mut(&key) {
                         Some(entry) => entry.update(obj, size, ts),
@@ -1108,12 +1157,10 @@ where
     V: Send + Sync + 'static,
 {
     pub fn new(
-        obj: V,
+        inner: Arc<V>,
         size: usize,
         last_hit: Timestamp,
     ) -> Self {
-        let inner = Arc::new(obj);
-
         Self {
             inner,
             size,
@@ -1124,12 +1171,10 @@ where
 
     pub fn update(
         &mut self,
-        obj: V,
+        inner: Arc<V>,
         size: usize,
         last_hit: Timestamp,
     ) {
-        let inner = Arc::new(obj);
-
         self.inner = inner;
         self.size = size;
         self.last_hit = last_hit;

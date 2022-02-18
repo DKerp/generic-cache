@@ -10,7 +10,8 @@ the conrete key of type `K`, and `value` the concrete object instance of type `V
 
 Note that values get automatically wrapped in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html)
 by the [`Cache`](crate::Cache) itself, so you do not need to wrap your
-objects in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) yourself.
+objects in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) yourself. You can still do it yourself
+ann add the object trough the `set_arc*` methods if you want to save the same object twice under different keys.
 
 # Async runtime required
 
@@ -73,25 +74,25 @@ async fn main() {
 
     /* Save the values inside the cache. */
 
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.id,
         Arc::clone(&user),
         0,
     ).await.unwrap();
 
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.username.clone(),
         Arc::clone(&user),
         0,
     ).await.unwrap();
 
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.id,
         Arc::clone(&profile),
         0,
     ).await.unwrap();
 
-    cache.set_with_size(
+    cache.set_arc_with_size(
         user.username.clone(),
         Arc::clone(&profile),
         0,
@@ -99,16 +100,16 @@ async fn main() {
 
     /* Retrieve the values again from the cache. */
 
-    let compare = cache.get::<u64, Arc<User>>(user.id).await.unwrap().unwrap();
-    assert_eq!(user, *compare);
+    let compare = cache.get::<u64, User>(user.id).await.unwrap().unwrap();
+    assert_eq!(user, compare);
 
-    let compare = cache.get::<String, Arc<User>>(user.username.clone()).await.unwrap().unwrap();
-    assert_eq!(user, *compare);
+    let compare = cache.get::<String, User>(user.username.clone()).await.unwrap().unwrap();
+    assert_eq!(user, compare);
 
-    let compare = cache.get::<u64, Arc<Profile>>(user.id).await.unwrap().unwrap();
-    assert_eq!(profile, *compare);
+    let compare = cache.get::<u64, Profile>(user.id).await.unwrap().unwrap();
+    assert_eq!(profile, compare);
 
-    let compare = cache.get::<String, Arc<Profile>>(user.username.clone()).await.unwrap().unwrap();
-    assert_eq!(profile, *compare);
+    let compare = cache.get::<String, Profile>(user.username.clone()).await.unwrap().unwrap();
+    assert_eq!(profile, compare);
 }
 ```
