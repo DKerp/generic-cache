@@ -11,7 +11,7 @@ the conrete key of type `K`, and `value` the concrete object instance of type `V
 Note that values get automatically wrapped in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html)
 by the [`Cache`](crate::Cache) itself, so you do not need to wrap your
 objects in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) yourself. You can still do it yourself
-ann add the object trough the `set_arc*` methods if you want to save the same object twice under different keys.
+and add the object through the `set_arc*` methods if you want to save the same object twice under different keys.
 
 # Async runtime required
 

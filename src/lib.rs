@@ -127,7 +127,8 @@ impl std::error::Error for Error {}
 /// ```
 ///
 /// Note that values get automatically wrapped in an [`Arc`] by the `Cache` itself, so you do not need to wrap your
-/// objects in an [`Arc`] yourself.
+/// objects in an [`Arc`] yourself.You can still do it yourself
+/// and add the object through the `set_arc*` methods if you want to save the same object twice under different keys.
 ///
 /// You may save objects of different types under the same key type, and you may save objects of the same type
 /// under different key types. But in order to retrieve these objects again you must use the same combination
