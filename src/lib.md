@@ -1,5 +1,3 @@
-# generic-cache
-
 A cache which is generic over both the keys as well as the values used. It allows the storing of
 __different types__ of values as well as __different types__ of keys inside a __single instance__.
 
@@ -10,7 +8,7 @@ the conrete key of type `K`, and `value` the concrete object instance of type `V
 <K, V> -> (key: K -> value: Arc<V>)
 ```
 
-Note that values get automatically wrapped in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) by the `Cache` itself, so you do not need to wrap your objects in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) yourself. You can still do it yourself and add the object through the `set_arc*` methods if you want to save the same object twice under different keys.
+Note that values get automatically wrapped in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) by the [`Cache`] itself, so you do not need to wrap your objects in an [`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) yourself. You can still do it yourself and add the object through the `set_arc*` methods if you want to save the same object twice under different keys.
 
 # Async runtime required
 
@@ -20,7 +18,7 @@ You can easily use the [`tokio`](https://docs.rs/tokio) or [`async_std`](https:/
 
 # A quick example
 
-We load a `User` record from the database and create a `Profile` page out of it in a relatively expensive way. Each user can be uniquely identified by either its `id` or its `username`. We save both structures under both keys inside a `Cache` instance which gets run by the [`tokio`](https://docs.rs/tokio) runtime.
+We load a `User` record from the database and create a `Profile` page out of it in a relatively expensive way. Each user can be uniquely identified by either its `id` or its `username`. We save both structures under both keys inside a [`Cache`] instance which gets run by the [`tokio`](https://docs.rs/tokio) runtime.
 
 ```rust
 use std::sync::Arc;

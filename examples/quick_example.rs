@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
 use generic_cache::Cache;
-use generic_cache::util::TokioSpawn;
+
+use fut_compat::task::TokioExecutor;
 // If we wanted to use the async_std runtime we would instead import and use the following:
-// use generic_cache::util::AsyncStdSpawn;
+// use fut_compat::task::AsyncStdExecutor;
 
 
 #[derive(Debug, PartialEq, Eq)]
@@ -27,7 +28,7 @@ async fn main() {
     /* Initialize the cache. */
 
     // We implicitely use the default config.
-    let cache = Cache::new_with_executor(TokioSpawn::default());
+    let cache = Cache::new_with_executor(TokioExecutor::default());
 
     /* Prepare the values to be cached. */
 

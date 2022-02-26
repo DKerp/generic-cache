@@ -41,7 +41,7 @@ pub trait Size: Sized {
     /// Determines how many bytes this object occupies inside the heap.
     ///
     /// The default implementation returns 0, assuming the object is fully allocated on the stack.
-    /// It must be adjusted as appropriate for objects which hold data inside the stack.
+    /// It must be adjusted as appropriate for objects which hold data inside the heap.
     fn get_heap_size(&self) -> usize {
         0
     }
