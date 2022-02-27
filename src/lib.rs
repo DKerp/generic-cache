@@ -11,9 +11,6 @@ pub use cache::*;
 mod entry;
 pub use entry::*;
 
-mod size;
-pub use size::*;
-
 
 
 /// A helper macro which creates an enum for using multiple types as the same type inside the [`Cache`].

@@ -1,4 +1,3 @@
-use crate::Size;
 use crate::entry::{Entry, EntryConfigInner};
 
 use std::collections::BTreeMap;
@@ -13,6 +12,8 @@ use futures::StreamExt;
 use futures::select;
 
 use futures_timer::Delay;
+
+use get_size::GetSize;
 
 
 
@@ -243,7 +244,9 @@ where
     ///
     /// The [`Cache`] instance will wrap the `value` inside an [`Arc`] before saving it.
     ///
-    /// The size of the `value` gets automatically computed by the [`Size`] trait implementation.
+    /// The size of the `value` gets automatically computed by the [`GetSize`] trait implementation.
+    ///
+    /// [`GetSize`]: https://docs.rs/get-size/latest/get-size/trait.GetSize.html
     pub async fn set<K, V>(
         &self,
         key: K,
@@ -251,9 +254,9 @@ where
     ) -> Result<(), Error>
     where
         K: Ord + Send + Sync + 'static,
-        V: Size + Send + Sync + 'static,
+        V: GetSize + Send + Sync + 'static,
     {
-        let size = Size::get_size(&value);
+        let size = GetSize::get_size(&value);
         let value = Arc::new(value);
 
         self.set_arc_with_size::<K, V>(key, value, size).await
@@ -265,7 +268,9 @@ where
     /// In this variant the `value` is already wrapped in an [`Arc`], so the [`Cache`] instance will
     /// not wrap it itself.
     ///
-    /// The size of the `value` gets automatically computed by the [`Size`] trait implementation.
+    /// The size of the `value` gets automatically computed by the [`GetSize`] trait implementation.
+    ///
+    /// [`GetSize`]: https://docs.rs/get-size/latest/get-size/trait.GetSize.html
     pub async fn set_arc<K, V>(
         &self,
         key: K,
@@ -273,10 +278,10 @@ where
     ) -> Result<(), Error>
     where
         K: Ord + Send + Sync + 'static,
-        V: Size + Send + Sync + 'static,
+        V: GetSize + Send + Sync + 'static,
     {
         // Make sure we take the size of V and not of Arc<V> (note the *).
-        let size = Size::get_size(&*value);
+        let size = GetSize::get_size(&*value);
 
         self.set_arc_with_size::<K, V>(key, value, size).await
     }
@@ -330,11 +335,11 @@ where
     ) -> Result<(), Error>
     where
         K: Ord + Send + Sync + 'static,
-        V: Size + Send + Sync + 'static,
+        V: GetSize + Send + Sync + 'static,
     {
         // Take the size as configured by the entry or calculate it if not set.
         // Make sure we take the size of V and not of Arc<V> (note the *).
-        let size = entry.size().unwrap_or_else(|| Size::get_size(&*entry.value()));
+        let size = entry.size().unwrap_or_else(|| GetSize::get_size(&*entry.value()));
 
         self.set_entry_with_size::<K, V>(entry, size).await
     }

@@ -7,9 +7,10 @@ edition = "2021"
 log = "0.4"
 futures = "^0.3.17"
 futures-timer = "^3.0.2"
-pretty_env_logger = "0.4"
+get-size = { path = "../get-size" }
 
 [dev-dependencies]
 fut-compat = { version = "^0.1", features = ["tokio-rt", "async-std-rt"] }
 tokio = { version = "1.13", features = ["rt", "rt-multi-thread", "macros"] }
 async-std = { version = "^1.10" }
+pretty_env_logger = "0.4"
